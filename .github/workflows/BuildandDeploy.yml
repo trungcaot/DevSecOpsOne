@@ -6,6 +6,15 @@ on:
       - qa
 
   workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: Select the environment
+        required: true
+        options:
+          - Dev
+          - Staging
+          - Production
 
 jobs:
   build:
@@ -29,7 +38,7 @@ jobs:
         run: |
           current_branch="${GITHUB_REF#refs/heads/}"
           aws_region="ap-southeast-1"
-          environment="Dev"
+          environment="${{ github.event.inputs.environment }}"
           app_setting_env="Development"
           docker_file_path=""
           service_name="DevSecOps-One"
