@@ -35,16 +35,16 @@ jobs:
           accessKey="${{ secrets.DEV_AWS_ACCESS_KEY }}"
           secretKey="${{ secrets.DEV_AWS_SECRET_KEY }}"
 
-          echo "::set-output name=access_key::${accessKey}"
-          echo "::set-output name=secret_key::${secretKey}"
-          echo "::set-output name=aws_region::${aws_region}"
-          echo "::set-output name=environment::${environment}"
-          echo "::set-output name=app_setting_env::${app_setting_env}"
-          echo "::set-output name=current_branch::${current_branch}"
-          echo "::set-output name=service_name::${service_name}"
+          echo "access_key=${accessKey}" >> $GITHUB_OUTPUT
+          echo "secret_key=${secretKey}" >> $GITHUB_OUTPUT
+          echo "aws_region=${aws_region}" >> $GITHUB_OUTPUT
+          echo "environment=${environment}" >> $GITHUB_OUTPUT
+          echo "app_setting_env=${app_setting_env}" >> $GITHUB_OUTPUT
+          echo "current_branch=${current_branch}" >> $GITHUB_OUTPUT
+          echo "service_name=${service_name}" >> $GITHUB_OUTPUT
 
       - name: Setup AWS Creds
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ steps.set-vars.outputs.access_key }}
           aws-secret-access-key: ${{ steps.set-vars.outputs.secret_key }}
