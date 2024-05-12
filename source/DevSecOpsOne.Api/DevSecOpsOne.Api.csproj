@@ -5,9 +5,9 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <InvariantGlobalization>true</InvariantGlobalization>
+    <UserSecretsId>e9a5fbee-6eb1-445b-8014-efed957615af</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <DockerfileContext>..\DevSecOpsOne</DockerfileContext>
-    <UserSecretsId>7fb452e1-bbf5-4cf0-9745-43a466e37ebb</UserSecretsId>
+    <DockerfileContext>.</DockerfileContext>
   </PropertyGroup>
 
   <ItemGroup>
