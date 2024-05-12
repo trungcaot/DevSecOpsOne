@@ -22,3 +22,34 @@ jobs:
       - name: Restore & Build .Net Core solution
         run: |
           dotnet build source/DevSecOpsOne.Api/DevSecOpsOne.Api.csproj 
+
+      - name: Transform Configuration Vars
+        id: set-vars
+        run: |
+          current_branch="${GITHUB_REF#refs/heads/}"
+          aws_region="ap-southeast-1"
+          environment="dev"
+          app_setting_env="Development"
+          docker_file_path=""
+          service_name="DevSecOps-One"
+          accessKey="${{ secrets.DEV_AWS_ACCESS_KEY }}"
+          secretKey="${{ secrets.DEV_AWS_SECRET_KEY }}"
+
+          echo "::set-output name=access_key::${accessKey}"
+          echo "::set-output name=secret_key::${secretKey}"
+          echo "::set-output name=aws_region::${aws_region}"
+          echo "::set-output name=environment::${environment}"
+          echo "::set-output name=app_setting_env::${app_setting_env}"
+          echo "::set-output name=current_branch::${current_branch}"
+          echo "::set-output name=service_name::${service_name}"
+
+      - name: Setup AWS Creds
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ steps.set-vars.outputs.access_key }}
+          aws-secret-access-key: ${{ steps.set-vars.outputs.secret_key }}
+          aws-region: ${{ steps.set-vars.outputs.aws_region }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
