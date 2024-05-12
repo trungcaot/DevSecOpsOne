@@ -1,10 +1,5 @@
 name: Build and Deploy
 on:
-  push:
-    branches:
-      - dev
-      - qa
-
   workflow_dispatch:
     inputs:
       environment:
