@@ -10,7 +10,8 @@ on:
           - Dev
           - Staging
           - Production
-
+env:
+  commit_sha: ${{github.event.client_payload.commit_sha}}
 jobs:
   build:
     runs-on: ubuntu-20.04
@@ -39,6 +40,7 @@ jobs:
           service_name="DevSecOpsOne"
           accessKey="${{ secrets.DEV_AWS_ACCESS_KEY }}"
           secretKey="${{ secrets.DEV_AWS_SECRET_KEY }}"
+          commitSha="${{env.commit_sha}}"
 
           echo "access_key=${accessKey}" >> $GITHUB_OUTPUT
           echo "secret_key=${secretKey}" >> $GITHUB_OUTPUT
@@ -59,40 +61,16 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Create ECR Repo for DevSecOpsOne-Api Image if not exists
-        id: ecr-repo-devsecopsone-api
-        uses: "trungcaot/create-ecr-repository-action@v1"
-        with:
-          region: ${{ steps.set-vars.outputs.region }}
-          aws_region: ${{ steps.set-vars.outputs.aws_region }}
-          environment: ${{ steps.set-vars.outputs.environment }}
-          service_name: "${{ steps.set-vars.outputs.service_name }}-api"
-
-      # Generate Docker image tags
-      - name: generate tags
-        id: tag-devsecopsone-api
-        uses: docker/metadata-action@v4
-        with:
-          images: ${{ steps.login-ecr.outputs.registry }}/${{ steps.ecr-repo-devsecopsone-api.outputs.repository-name }}
-          tags: |
-            type=raw,value=${{ steps.set-vars.outputs.environment }}
-            type=ref,event=branch,suffix=-{{ sha }},priority=1
-            type=ref,event=pr
-            type=ref,event=tag
-            type=raw,value=latest
-
       # Build and push Docker images         
-      - uses: docker/setup-buildx-action@v2
-      - name: Build and push
-        uses: docker/build-push-action@v3
-        with:
-          push: true
-          provenance: false
-          cache-from: type=gha 
-          context: ./${{steps.set-vars.outputs.docker_file_path}}
-          cache-to: type=gha,mode=max
-          tags: ${{ steps.tag-devsecopsone-api.outputs.tags }}
-          labels: ${{ steps.tag-devsecopsone-api.outputs.labels }}
-          file: ./${{ steps.set-vars.outputs.docker_file_path }}/source/DevSecOpsOne.Api/Dockerfile
-          build-args: |
-            ENV=${{ steps.set-vars.outputs.app_setting_env }}
+      - name: Build, tag, and push DevSecOpsOne image to Amazon ECR
+        id: buildImageDevSecOpsOne
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ env.commit_sha }}
+        run: |
+          # Build a docker container and push it to ECR so that it can be deployed to ECS.
+          cd source/DevSecOpsOne.Api
+          ECR_REPOSITORY="devsecopsone-api" 
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:Latest .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
+          echo "::set-output name=imageDigestDevSecOpsOne::$IMAGE_TAG"
