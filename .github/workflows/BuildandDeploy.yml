@@ -49,6 +49,7 @@ jobs:
           echo "app_setting_env=${app_setting_env}" >> $GITHUB_OUTPUT
           echo "current_branch=${current_branch}" >> $GITHUB_OUTPUT
           echo "service_name=${service_name}" >> $GITHUB_OUTPUT
+          echo "docker_file_path=${docker_file_path}" >> $GITHUB_OUTPUT
 
       - name: Setup AWS Creds
         uses: aws-actions/configure-aws-credentials@v4
