@@ -82,8 +82,7 @@ jobs:
           IMAGE_TAG: ${{ steps.tag-devsecopsone-api.outputs.tags }}
         run: |
           # Build a docker container and push it to ECR so that it can be deployed to ECS.
-          cd source/DevSecOpsOne.Api
           ECR_REPOSITORY="${{ env.repository_name }}"
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:Latest .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG "./source/DevSecOpsOne.Api"
           docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
           echo "::set-output name=imageDigestDevSecOpsOne::$IMAGE_TAG"
